@@ -28,7 +28,7 @@ def preprocess_image(img_data):
     # Reshape for model input
     img_array = img_array.reshape(1, 28, 28, 1)
 
-    print("Pixel values range:", img_array.min(), "to", img_array.max())
+    # print("Pixel values range:", img_array.min(), "to", img_array.max())
     return img_array
 
 
@@ -47,10 +47,10 @@ def predict():
     img = preprocess_image(img_data)
 
     # Debugging prints
-    print("Pixel values range:", img.min(), "to", img.max())
+    # print("Pixel values range:", img.min(), "to", img.max())
 
     prediction = model.predict(img)
-    print("Prediction probabilities:", prediction)
+    # print("Prediction probabilities:", prediction)
 
     return jsonify({'prediction': int(np.argmax(prediction))})
 
