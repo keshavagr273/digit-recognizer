@@ -7,7 +7,7 @@ from PIL import Image
 from io import BytesIO
 
 app = Flask(__name__)
-model = tf.keras.models.load_model('mnist_model.h5')
+model = tf.keras.models.load_model('best_mnist_model.h5')
 model.predict(np.zeros((1, 28, 28, 1)))  # warmup
 
 def preprocess_image(img_data):
