@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Handwritten Digit Recognizer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 text-center p-8 font-sans">
+
+    <h1 class="text-3xl font-bold mb-6 text-gray-800">Draw a Digit (0-9)</h1>
+
+    <div class="flex justify-center">
+        <canvas id="canvas" width="280" height="280"
+                class="border-4 border-black bg-black shadow-lg"
+                style="image-rendering: pixelated; width: 280px; height: 280px;">
+        </canvas>
+    </div>
+
+    <div class="mt-6">
+        <button onclick="clearCanvas()" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded mx-2">
+            Clear
+        </button>
+        <button onclick="predict()" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mx-2">
+            Predict
+        </button>
+    </div>
+
+    <h3 id="result" class="text-xl mt-6 font-medium text-gray-700"></h3>
+
+    <script>
+        const canvas = document.getElementById("canvas");
+        const ctx = canvas.getContext("2d");
+        let painting = false;
+
+        // Set black background initially
+        ctx.fillStyle = "black";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        canvas.addEventListener("mousedown", () => painting = true);
+        canvas.addEventListener("mouseup", () => {
+            painting = false;
+            ctx.beginPath();
+        });
+        canvas.addEventListener("mousemove", draw);
+
+        ctx.lineWidth = 20;
+        ctx.lineCap = "round";
+        ctx.strokeStyle = "#FFF"; // white stroke on black
+
+        function draw(e) {
+            if (!painting) return;
+            const rect = canvas.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const y = e.clientY - rect.top;
+            ctx.lineTo(x, y);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+        }
+
+        function clearCanvas() {
+            ctx.fillStyle = "black";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.beginPath();
+            document.getElementById("result").textContent = "";
+        }
+
+        async function predict() {
+            // Downscale to 28x28
+            const smallCanvas = document.createElement("canvas");
+            smallCanvas.width = 28;
+            smallCanvas.height = 28;
+            const smallCtx = smallCanvas.getContext("2d");
+            smallCtx.drawImage(canvas, 0, 0, 28, 28);
+
+            const image = smallCanvas.toDataURL("image/png");
+
+            const response = await fetch('/predict', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ image: image })
+            });
+
+            const result = await response.json();
+            document.getElementById("result").textContent = `Predicted Digit: ${result.prediction}`;
+        }
+    </script>
+
+</body>
+</html>
